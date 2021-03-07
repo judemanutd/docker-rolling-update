@@ -1,0 +1,30 @@
+{
+  "name": "docker-rolling-update",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/judemanutd/docker-rolling-update.git"
+  },
+  "author": "Jude Fernandes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/judemanutd/docker-rolling-update/issues"
+  },
+  "homepage": "https://github.com/judemanutd/docker-rolling-update#readme",
+  "dependencies": {
+    "@tinyhttp/app": "^1.2.12",
+    "nodemon": "^2.0.7"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0"
+  }
+}
