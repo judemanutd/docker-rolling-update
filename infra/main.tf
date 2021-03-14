@@ -106,3 +106,13 @@ module "key_pair" {
   key_name   = "${var.project_name}-${var.environment}-key"
   public_key = var.instance_public_key
 }
+
+# Domain
+module "routing" {
+  source           = "./routing"
+  domain           = var.domain
+  server_public_ip = aws_eip.ip.public_ip
+  project_name     = var.project_name
+  environment      = var.environment
+  region           = var.region
+}

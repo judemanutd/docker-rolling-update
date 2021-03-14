@@ -2,6 +2,9 @@ variable "environment" {
   default = "staging"
 }
 
+variable "domain" {
+}
+
 variable "region" {
   default = "ap-south-1"
 }
@@ -22,6 +25,6 @@ variable "server_port" {
 }
 
 # https://serverfault.com/a/978968/622408
-# ssh-keygen -P "" -t rsa -b 4096 -m pem -f my-key-pair
+# ssh-keygen -P "" -t rsa -b 4096 -m pem -f my-key-pair.pem
 variable "instance_public_key" {
 }
