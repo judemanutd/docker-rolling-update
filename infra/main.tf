@@ -3,6 +3,26 @@ provider "aws" {
   region  = var.region
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/${var.ami_version}-${var.architecture}-server-*"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 # VPC
 module "project_vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -35,7 +55,7 @@ module "project_vpc" {
 }
 
 # Security Groups
-module "sg" {
+module "project_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
   name   = "${var.project_name}-security-group"
@@ -61,4 +81,41 @@ module "sg" {
       cidr_blocks = "0.0.0.0/0"
     }
   ]
+}
+
+# EC2 Instance
+module "ec2_cluster" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+
+  name           = "${var.environment}-server"
+  instance_count = 1
+
+  # ami can be found from the aws console
+  # use 099720109477 as the owner which is canonical and filter the version from there
+  ami                     = "ami-02d8619fc5511c34e"
+  instance_type           = "t3.nano"
+  key_name                = "user1"
+  monitoring              = true
+  vpc_security_group_ids  = [module.project_sg.this_security_group_id]
+  subnet_ids              = module.project_vpc.public_subnets
+  disable_api_termination = false
+
+  root_block_device = [{
+    volume_size = 30
+  }]
+
+  tags = {
+    Terraform   = "true"
+    Environment = var.environment
+    Name        = "${var.project_name}-${var.environment}-aws"
+  }
+}
+
+resource "aws_eip" "ip" {
+  vpc = true
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = element(module.ec2_cluster.id, 0)
+  allocation_id = aws_eip.ip.id
 }
