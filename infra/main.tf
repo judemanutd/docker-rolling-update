@@ -3,26 +3,6 @@ provider "aws" {
   region  = var.region
 }
 
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/${var.ami_version}-${var.architecture}-server-*"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
 # VPC
 module "project_vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -94,7 +74,7 @@ module "ec2_cluster" {
   # use 099720109477 as the owner which is canonical and filter the version from there
   ami                     = "ami-02d8619fc5511c34e"
   instance_type           = "t3.nano"
-  key_name                = "user1"
+  key_name                = module.key_pair.this_key_pair_key_name
   monitoring              = true
   vpc_security_group_ids  = [module.project_sg.this_security_group_id]
   subnet_ids              = module.project_vpc.public_subnets
@@ -118,4 +98,11 @@ resource "aws_eip" "ip" {
 resource "aws_eip_association" "eip_assoc" {
   instance_id   = element(module.ec2_cluster.id, 0)
   allocation_id = aws_eip.ip.id
+}
+
+module "key_pair" {
+  source = "terraform-aws-modules/key-pair/aws"
+
+  key_name   = "${var.project_name}-${var.environment}-key"
+  public_key = var.instance_public_key
 }
